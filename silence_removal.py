@@ -5,7 +5,7 @@ import numpy as np
 from concurrent.futures import ThreadPoolExecutor
 
 SOURCE_DIRECTORIES = ['daps']
-MIN_SEGMENT_LENGTH = 12  
+MIN_SEGMENT_LENGTH = 4  
 
 def split_and_save_segments(audio, sr, non_silent_intervals, audio_path):
     segment_count = 0
