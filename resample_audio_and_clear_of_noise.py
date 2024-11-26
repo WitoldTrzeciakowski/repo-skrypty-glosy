@@ -24,6 +24,7 @@ def re_sample_audio(audio_path):
         audio, _ = librosa.load(audio_path, sr=frame_rate)
         audio_resampled = librosa.resample(audio, target_sr=48000, orig_sr=frame_rate)
         sf.write(audio_path, audio_resampled, 48000)
+        return audio_path
     print(f"Resampling done on file: {audio_path}")
 
 def recursively_resample(src_dirs):
@@ -48,7 +49,7 @@ def recursively_delete_noise(src_dirs, model, df_state):
                     enhanced = enhance(model, df_state, audio)
                     enhanced_audio_path = audio_path.replace('.wav', '_enhanced.wav') 
                     save_audio(enhanced_audio_path, enhanced, df_state.sr())
-                    os.remove(audio_path)
+                    #os.remove(audio_path)
                     print(f"Processed and deleted: {audio_path}")
 
 if __name__ == "__main__":

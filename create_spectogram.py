@@ -20,7 +20,8 @@ def save_spectrogram(audio, sr, output_path):
     plt.tight_layout()
     plt.savefig(output_path, bbox_inches='tight', pad_inches=0)
     plt.close()
-    print(f"Spectrogram saved to: {output_path}")
+    #print(f"Spectrogram saved to: {output_path}")
+    return output_path
 
 def process_audio_file(audio_path, dest_root):
     """
@@ -39,7 +40,7 @@ def process_audio_file(audio_path, dest_root):
         output_path = os.path.join(output_dir, output_filename)
 
         # Save the spectrogram
-        save_spectrogram(audio, sr, output_path)
+        return save_spectrogram(audio, sr, output_path)
 
     except Exception as e:
         print(f"Error processing {audio_path}: {e}")

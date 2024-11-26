@@ -8,6 +8,7 @@ SOURCE_DIRECTORIES = ['stash']
 MIN_SEGMENT_LENGTH = 3  
 
 def split_and_save_segments(audio, sr, non_silent_intervals, audio_path):
+    paths = []
     segment_count = 0
     current_segment = []
     current_duration = 0
@@ -24,6 +25,7 @@ def split_and_save_segments(audio, sr, non_silent_intervals, audio_path):
                 segment_count += 1
                 output_filename = f"{os.path.splitext(audio_path)[0]}_segment_{segment_count}.wav"
                 sf.write(output_filename, combined_segment, sr)
+                paths.append(output_filename)
                 print(f"Saved segment to: {output_filename}")
             current_segment = [segment]
             current_duration = segment_duration
@@ -32,14 +34,16 @@ def split_and_save_segments(audio, sr, non_silent_intervals, audio_path):
         segment_count += 1
         output_filename = f"{os.path.splitext(audio_path)[0]}_segment_{segment_count}.wav"
         sf.write(output_filename, combined_segment, sr)
+        paths.append(output_filename)
         print(f"Saved segment to: {output_filename}")
+    return paths
 
 def process_audio_file(audio_path, top_db=60):
     try:
         audio, sr = librosa.load(audio_path, sr=None)
         trimmed_audio, _ = librosa.effects.trim(audio, top_db=top_db)
         non_silent_intervals = librosa.effects.split(trimmed_audio, top_db=top_db)
-        split_and_save_segments(trimmed_audio, sr, non_silent_intervals, audio_path)
+        return      split_and_save_segments(trimmed_audio, sr, non_silent_intervals, audio_path)
     except Exception as e:
         print(f"Error processing file {audio_path}: {e}")
 
