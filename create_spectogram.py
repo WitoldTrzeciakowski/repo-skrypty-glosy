@@ -2,50 +2,66 @@ import librosa
 import os
 import matplotlib.pyplot as plt
 import librosa.display
-import concurrent.futures
+from concurrent.futures import ThreadPoolExecutor
 
-SOURCE_DIRECTORIES = ['daps']
-SPECTROGRAM_DIR = 'spectrograms' 
-
-def create_spectrogram_directory():
-    if not os.path.exists(SPECTROGRAM_DIR):
-        os.makedirs(SPECTROGRAM_DIR)
+SOURCE_DIRECTORIES = ['stash']
+SPECTROGRAM_DIR = 'spectrograms'
 
 def save_spectrogram(audio, sr, output_path):
+    """
+    Save the spectrogram of the given audio signal to the output path.
+    """
     spectrogram = librosa.stft(audio)
     spectrogram_db = librosa.amplitude_to_db(abs(spectrogram))
+    
     plt.figure(figsize=(10, 4))
     librosa.display.specshow(spectrogram_db, sr=sr, x_axis='time', y_axis='log', cmap='viridis')
-    plt.axis('off') 
+    plt.axis('off')  # Hide axes
     plt.tight_layout()
     plt.savefig(output_path, bbox_inches='tight', pad_inches=0)
     plt.close()
     print(f"Spectrogram saved to: {output_path}")
 
-def process_audio_file(audio_path):
-    audio, sr = librosa.load(audio_path, sr=None)
-    output_filename = f"{os.path.splitext(os.path.basename(audio_path))[0]}_spectrogram.png"
-    output_path = os.path.join(SPECTROGRAM_DIR, output_filename)
-    save_spectrogram(audio, sr, output_path)
+def process_audio_file(audio_path, dest_root):
+    """
+    Process a single audio file: generate and save its spectrogram.
+    """
+    try:
+        # Load the audio file
+        audio, sr = librosa.load(audio_path, sr=None)
 
-def process_final_directories(src_dirs):
-    for directory in src_dirs:
-        for root, dirs, files in os.walk(directory):
-            # Process only the final directories
-            if not dirs:  # Check if it's a final directory (no subdirectories)
-                for file in files:
-                    if file.endswith(".wav") and not file.startswith('.'):  
-                        audio_path = os.path.join(root, file)
-                        process_audio_file(audio_path)
+        # Define the output path, mirroring the source directory structure
+        relative_path = os.path.relpath(audio_path, start=SOURCE_DIRECTORIES[0])
+        output_dir = os.path.join(dest_root, os.path.dirname(relative_path))
+        os.makedirs(output_dir, exist_ok=True)
 
-def recursively_generate_spectrograms(src_dirs):
-    create_spectrogram_directory()
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = []
-        for directory in src_dirs:
-            futures.append(executor.submit(process_final_directories, [directory]))
-        # Wait for all futures to complete
-        concurrent.futures.wait(futures)
+        output_filename = f"{os.path.splitext(os.path.basename(audio_path))[0]}_spectrogram.png"
+        output_path = os.path.join(output_dir, output_filename)
+
+        # Save the spectrogram
+        save_spectrogram(audio, sr, output_path)
+
+    except Exception as e:
+        print(f"Error processing {audio_path}: {e}")
+
+def process_final_directories(src_dir, dest_dir):
+    """
+    Process final directories containing audio files.
+    """
+    for root, dirs, files in os.walk(src_dir):
+        if not dirs:  # Process only final directories (no subdirectories)
+            for file in files:
+                if file.endswith(".wav") and not file.startswith('.'):  
+                    audio_path = os.path.join(root, file)
+                    process_audio_file(audio_path, dest_dir)
+
+def recursively_generate_spectrograms(src_dirs, dest_dir):
+    """
+    Generate spectrograms for all `.wav` files in the source directories.
+    """
+    with ThreadPoolExecutor() as executor:
+        for src_dir in src_dirs:
+            executor.submit(process_final_directories, src_dir, dest_dir)
 
 if __name__ == "__main__":
-    recursively_generate_spectrograms(SOURCE_DIRECTORIES)
+    recursively_generate_spectrograms(SOURCE_DIRECTORIES, SPECTROGRAM_DIR)

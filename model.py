@@ -13,7 +13,6 @@ from torchvision.models import resnet18, ResNet18_Weights
 from dotenv import load_dotenv
 load_dotenv()
 
-# Set the path to your dataset directory
 PATH_TO_PLANTNET_300K = r'G:\glosy_model\clean_data'
 
 
@@ -122,7 +121,7 @@ def train_and_evaluate( gamma=0.1, step_size=7, weight_decay=5e-4, momentum=0.9,
     return metrics_per_epoch
 
 def main():
-    metrics = train_and_evaluate(num_epochs=4)
+    metrics = train_and_evaluate(num_epochs=10)
 
     for epoch_data in metrics:
         print(f"\nEpoch {epoch_data['epoch']} Metrics:")

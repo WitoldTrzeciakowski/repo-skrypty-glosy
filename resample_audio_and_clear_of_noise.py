@@ -4,7 +4,7 @@ import wave
 import os
 from df.enhance import enhance, init_df, load_audio, save_audio
 
-SOURCE_DIRECTORIES = ['daps']
+SOURCE_DIRECTORIES = ['stash']
 
 def is_valid_wav_file(file_path):
     """Check if the file is a valid WAV file."""

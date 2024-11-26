@@ -14,12 +14,20 @@ final =[]
 class CIFAR10LikeCNN(nn.Module):
     def __init__(self, num_classes):
         super(CIFAR10LikeCNN, self).__init__()
+        
+        # Convolutional layers
         self.conv1 = nn.Conv2d(3, 32, kernel_size=3, padding=1)
         self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1)
         self.conv3 = nn.Conv2d(64, 128, kernel_size=3, padding=1)
+        
+        # Pooling layer
         self.pool = nn.MaxPool2d(2, 2)
-        self.fc1 = nn.Linear(128 * 4 * 4, 256)
+        
+        # Fully connected layers
+        self.fc1 = nn.Linear(128 * 4 * 4, 256)  # Adjust based on input dimensions
         self.fc2 = nn.Linear(256, num_classes)
+        
+        # Activation and dropout
         self.relu = nn.ReLU()
         self.dropout = nn.Dropout(0.5)
     
@@ -96,7 +104,7 @@ if __name__ == "__main__":
         
         avg_val_loss = val_loss / len(val_loader)
         val_accuracy = 100 * correct / total
-        final.append("Validation Loss: {avg_val_loss:.4f}, Validation Accuracy: {val_accuracy:.2f}%\n")
+        final.append(f"Validation Loss: {avg_val_loss:.4f}, Validation Accuracy: {val_accuracy:.2f}%\n")
     with open('cifar_final.pkl', 'wb') as handle:
         pickle.dump(final, handle)
     print("Training complete.")
