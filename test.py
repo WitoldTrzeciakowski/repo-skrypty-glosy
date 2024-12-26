@@ -10,7 +10,7 @@ from resample_audio_and_clear_of_noise import re_sample_audio, is_valid_wav_file
 from torchvision.models import resnet18
 from silence_removal import process_audio_file
 from resample_audio_and_clear_of_noise import re_sample_audio
-from create_spectogram import process_audio_file as specotgram_process
+from create_spectrogram import process_audio_file as specotgram_process
 from df.enhance import enhance, init_df, load_audio, save_audio
 
 LOCATORS_SPEAKERS_LIST = ["f1", "f7", "f8", "m3", "m6", "m8"]
@@ -112,14 +112,11 @@ def process_file(file_path,model_df,df_state):
             good+= 1
         else:
             bad+= 1
-    if good > bad:
-        print("Welcome in :)")
-    else:
-        print("Bye Bye robber ")
+    return good > bad
 
 
 
 
 
 # Example usage
-process_file(r"G:\glosy_model\stash\daps\ipadflat_office1\f1_script1_ipadflat_office1_enhanced.wav",model_df,df_state)
+#process_file(r"G:\glosy_model\stash\daps\ipadflat_office1\f1_script1_ipadflat_office1_enhanced.wav",model_df,df_state)

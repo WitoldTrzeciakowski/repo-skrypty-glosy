@@ -28,6 +28,7 @@ def record_audio():
     global is_recording
     print("Recording... Press Enter to stop.")
     audio_buffer = []
+
     def callback(indata, frames, time, status):
         if status:
             print(f"Status: {status}")
@@ -35,20 +36,29 @@ def record_audio():
             audio_buffer.append(indata.copy())
         else:
             raise sd.CallbackStop()
-    with sd.InputStream(samplerate=sr, channels=channels, dtype=dtype, callback=callback):
-        while is_recording:
-            sd.sleep(100)
-    print("Recording stopped!")
-    audio = np.concatenate(audio_buffer, axis=0).flatten()
-    return audio
+
+    try:
+        with sd.InputStream(samplerate=sr, channels=channels, dtype=dtype, callback=callback):
+            while is_recording:
+                sd.sleep(100)
+        print("Recording stopped!")
+        if not audio_buffer:
+            print("No audio captured.")
+            return np.array([])  # Handle empty buffer case
+        audio = np.concatenate(audio_buffer, axis=0).flatten()
+        return audio
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return np.array([])
 
 
-def process_audio_file(audio, sr):
+def save_audio_file(audio, sr):
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     output_filename = f"{timestamp}_audio.wav"
     output_path = os.path.join(AUDIO_DIR, output_filename)
     sf.write(output_path, audio, sr)
     print(f"Audio file saved to: {output_path}")
+    return output_path
 
 
 
@@ -63,5 +73,5 @@ audio = librosa.util.normalize(audio)
 
 print(f"Audio recorded: {audio.shape}, Sampling rate: {sr}")
 
-process_audio_file(audio, sr)
+save_audio_file(audio, sr)
 
