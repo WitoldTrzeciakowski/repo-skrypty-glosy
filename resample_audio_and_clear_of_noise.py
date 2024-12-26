@@ -4,7 +4,7 @@ import wave
 import os
 from df.enhance import enhance, init_df, load_audio, save_audio
 
-SOURCE_DIRECTORIES = ['stash']
+SOURCE_DIRECTORIES = ['NewAudio']
 
 def is_valid_wav_file(file_path):
     """Check if the file is a valid WAV file."""
@@ -49,7 +49,7 @@ def recursively_delete_noise(src_dirs, model, df_state):
                     enhanced = enhance(model, df_state, audio)
                     enhanced_audio_path = audio_path.replace('.wav', '_enhanced.wav') 
                     save_audio(enhanced_audio_path, enhanced, df_state.sr())
-                    #os.remove(audio_path)
+                    os.remove(audio_path)
                     print(f"Processed and deleted: {audio_path}")
 
 if __name__ == "__main__":

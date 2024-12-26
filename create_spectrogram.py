@@ -4,8 +4,11 @@ import matplotlib.pyplot as plt
 import librosa.display
 from concurrent.futures import ThreadPoolExecutor
 
-SOURCE_DIRECTORIES = ['stash']
-SPECTROGRAM_DIR = 'spectrograms'
+from sympy.physics.control.control_plots import matplotlib
+
+matplotlib.use('Agg')
+SOURCE_DIRECTORIES = ['NewAudio']
+SPECTROGRAM_DIR = 'NewSpec'
 
 def save_spectrogram(audio, sr, output_path):
     """
@@ -52,7 +55,7 @@ def process_final_directories(src_dir, dest_dir):
     for root, dirs, files in os.walk(src_dir):
         if not dirs:  # Process only final directories (no subdirectories)
             for file in files:
-                if file.endswith(".wav") and not file.startswith('.'):  
+                if file.endswith(".wav") and not file.startswith('.'):
                     audio_path = os.path.join(root, file)
                     process_audio_file(audio_path, dest_dir)
 
