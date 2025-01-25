@@ -9,26 +9,28 @@ import numpy as np
 from sklearn.metrics import confusion_matrix, classification_report
 import pickle
 from torchvision.models import resnet18, ResNet18_Weights
-
+import json
 from dotenv import load_dotenv
 load_dotenv()
 
-PATH_TO_PLANTNET_300K = r'G:\glosy_model\clean_data'
-
+PATH_TO_VOICES = r'G:\glosy_model\clean_data'
 
 def evaluate_model_per_epoch(model, test_loader, selected_classes, device, epoch):
     model.eval()
     all_labels = []
     all_preds = []
+    all_logits = []
     correct = 0
     total = 0
+
     with torch.no_grad():
         for inputs, labels in test_loader:
             inputs, labels = inputs.to(device), labels.to(device)
-            outputs = model(inputs)
+            outputs = model(inputs)  # Non-normalized outputs (logits)
             _, predicted = torch.max(outputs.data, 1)
             all_labels.extend(labels.cpu().numpy())
             all_preds.extend(predicted.cpu().numpy())
+            all_logits.extend(outputs.cpu().numpy().tolist())  # Convert logits to a list
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
 
@@ -36,10 +38,25 @@ def evaluate_model_per_epoch(model, test_loader, selected_classes, device, epoch
     report = classification_report(all_labels, all_preds, target_names=selected_classes, output_dict=True)
     recall_per_class = [report[cls]['recall'] for cls in selected_classes]
     
-
     top_5_best_recall = sorted(zip(selected_classes, recall_per_class), key=lambda x: x[1], reverse=True)[:5]
     top_5_worst_recall = sorted(zip(selected_classes, recall_per_class), key=lambda x: x[1])[:5]
     overall_accuracy = 100 * correct / total
+
+    # Save predictions to JSON
+    predictions = []
+    num =0
+    for actual, predicted, logits in zip(all_labels, all_preds, all_logits):
+        num+=1
+        predictions.append({
+            "file": selected_classes[actual] + " " + str(num),
+            "predicted": selected_classes[predicted],
+            "logits": logits  # Non-normalized predictions
+        })
+
+    predictions_file = f'predictions_epoch_{epoch}.json'
+    with open(predictions_file, mode='w') as file:
+        json.dump(predictions, file, indent=4)
+    print(f"Predictions saved to {predictions_file}")
 
     return {
         "confusion_matrix": cm,
@@ -58,8 +75,8 @@ def train_and_evaluate( gamma=0.1, step_size=7, weight_decay=5e-4, momentum=0.9,
         transforms.Normalize(mean=[0.485], std=[0.229]),  # Normalize for single-channel
     ])
 
-    train_path = os.path.join(PATH_TO_PLANTNET_300K, 'train')
-    test_path = os.path.join(PATH_TO_PLANTNET_300K, 'eval')
+    train_path = os.path.join(PATH_TO_VOICES, 'train')
+    test_path = os.path.join(PATH_TO_VOICES, 'eval')
 
     # Debugging: Print paths to check if they are correct
     print(f'Train path: {train_path}')  # Debugging
