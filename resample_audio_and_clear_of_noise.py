@@ -11,7 +11,8 @@ def is_valid_wav_file(file_path):
     try:
         with wave.open(file_path, "rb") as wave_file:
             return True
-    except wave.Error:
+    except wave.Error as e:
+        print(f"Error: {e}")  # Print the error message
         return False
 
 def re_sample_audio(audio_path):
