@@ -26,19 +26,11 @@ class AudioRecorder:
 
     def stop_recording(self, file_path):
         """Stop recording and save the audio to a file."""
-        sd.wait()  # Wait for the recording to finish
+        sd.wait() 
         print("Recording finished.")
-        
-        # Convert the file path to absolute
         absolute_file_path = os.path.abspath(file_path)
-
-        # Convert to 16-bit (normalize to the range of 16-bit integers)
-        scaled_recording = np.int16(self.recording * 32767)  # Scaling to 16-bit range
-
-        # Save as 16-bit WAV using scipy
+        scaled_recording = np.int16(self.recording * 32767)  
         write(absolute_file_path, self.rate, scaled_recording)
-
-        # Optionally, save as 16-bit WAV using wavio
         wv.write(absolute_file_path.replace(".wav", "_wavio.wav"), scaled_recording, self.rate, sampwidth=2)
         print(f"Recording saved to {absolute_file_path}.")
 
@@ -47,7 +39,6 @@ class AudioRecorder:
     def get_recording(self):
         return self.recording
 
-# Initialize the recorder
 recorder = AudioRecorder()
 
 def start_record():
@@ -86,7 +77,6 @@ def select_and_process():
         process_and_display_result(absolute_file_path)
     print("FINISHED")
 
-# Create the GUI
 root = Tk()
 root.title("Audio Classifier")
 
